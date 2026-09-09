@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { X, UploadCloud, Loader2, Scan } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { X, UploadCloud, Loader2 } from 'lucide-react';
 import { deleteUploadThingFile } from '../../services/uploadQueue';
 import { useBusinessStore } from '../../stores/businessStore';
 import {
@@ -9,7 +9,11 @@ import {
   getCategoryEmoji,
   getCategoryLabel,
 } from '../../utils/businessTypeConfig';
-import { Scanner } from '../Scanner';
+import {
+  applyScannedDestinationValue,
+  defaultRestoreFieldValue,
+  useRegisterScanHandler,
+} from '../../contexts/ScannerContext';
 import { useFindProduct } from '../../hooks/useProducts';
 import { useTranslation } from '../../hooks/useTranslation';
 import { SideDrawer } from '../common/SideDrawer';
@@ -74,9 +78,27 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
   const [icon, setIcon] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
+  const barcodeInputLockRef = useRef(false);
+
+  const restoreModalFieldValue = useCallback((element: Element, value: string) => {
+    defaultRestoreFieldValue(element, value);
+  }, []);
+
+  useRegisterScanHandler(
+    (code) => {
+      applyScannedDestinationValue(barcodeInputRef, code, setBarcode);
+      barcodeInputRef.current?.focus();
+    },
+    isOpen,
+    {
+      scanDestinationRefs: [barcodeInputRef],
+      restoreFieldValue: restoreModalFieldValue,
+      scanInputLockRef: barcodeInputLockRef,
+    }
+  );
 
   // Sync form states with product or defaults when opened
   useEffect(() => {
@@ -221,12 +243,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
 
   const drawerFooter = (
     <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'flex-end' }}>
-      <button
-        type="button"
-        onClick={onClose}
-        style={styles.cancelBtn}
-        disabled={submitting}
-      >
+      <button type="button" onClick={onClose} style={styles.cancelBtn} disabled={submitting}>
         {t('common.cancel')}
       </button>
       <button
@@ -242,9 +259,7 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
           </div>
         ) : (
           <span>
-            {mode === 'create'
-              ? t('catalog.saveProductToCatalog')
-              : t('catalog.editProduct')}
+            {mode === 'create' ? t('catalog.saveProductToCatalog') : t('catalog.editProduct')}
           </span>
         )}
       </button>
@@ -310,20 +325,16 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
                     </div>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                       <input
+                        ref={barcodeInputRef}
                         type="text"
                         placeholder="e.g. 47900101"
                         value={barcode}
-                        onChange={(e) => setBarcode(e.target.value)}
-                        style={{ ...styles.modalInput, paddingRight: '40px' }}
+                        onChange={(e) => {
+                          if (barcodeInputLockRef.current) return;
+                          setBarcode(e.target.value);
+                        }}
+                        style={styles.modalInput}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowScanner(true)}
-                        style={styles.barcodeScanBtn}
-                        title="Scan Barcode using camera"
-                      >
-                        <Scan size={18} color="var(--primary)" />
-                      </button>
                     </div>
                   </div>
 
@@ -499,15 +510,6 @@ export const RegisterProductModal: React.FC<RegisterProductModalProps> = ({
           </div>
         </form>
       </SideDrawer>
-      {showScanner && (
-        <Scanner
-          onScan={(code) => {
-            setBarcode(code);
-            setShowScanner(false);
-          }}
-          onClose={() => setShowScanner(false)}
-        />
-      )}
     </>
   );
 };

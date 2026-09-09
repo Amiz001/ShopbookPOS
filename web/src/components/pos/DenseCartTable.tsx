@@ -22,6 +22,7 @@ interface DenseCartTableProps {
   setScanQuery: (val: string) => void;
   handleScanSubmit: (e: React.FormEvent) => void;
   scanInputRef: React.RefObject<HTMLInputElement | null>;
+  scanInputLockRef?: React.RefObject<boolean>;
 }
 
 export const DenseCartTable: React.FC<DenseCartTableProps> = ({
@@ -32,6 +33,7 @@ export const DenseCartTable: React.FC<DenseCartTableProps> = ({
   setScanQuery,
   handleScanSubmit,
   scanInputRef,
+  scanInputLockRef,
 }) => {
   return (
     <div style={styles.normalTablePanel}>
@@ -44,7 +46,10 @@ export const DenseCartTable: React.FC<DenseCartTableProps> = ({
             type="text"
             placeholder="Scan product barcode or type Quick-Code... (Press [/] or [F2])"
             value={scanQuery}
-            onChange={(e) => setScanQuery(e.target.value)}
+            onChange={(e) => {
+              if (scanInputLockRef?.current) return;
+              setScanQuery(e.target.value);
+            }}
             style={styles.scannerInput}
           />
         </div>

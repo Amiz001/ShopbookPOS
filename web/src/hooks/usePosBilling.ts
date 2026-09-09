@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../stores/cartStore';
 import { useAuthStore } from '../stores/authStore';
 import { useBusinessStore } from '../../src/stores/businessStore';
 import { useSettingsStore } from '../stores/settingsStore';
-import { useHardwareScanner } from '../components/Scanner';
+import {
+  applyScannedDestinationValue,
+  defaultRestoreFieldValue,
+  useRegisterScanHandler,
+} from '../contexts/ScannerContext';
 import { useProducts, mapDBProduct, useFindProduct } from './useProducts';
 import { useCreateOrder } from './useOrders';
 import { useQueryClient } from '@tanstack/react-query';
@@ -96,6 +100,7 @@ export function usePosBilling() {
 
   // Focus Refs
   const scanInputRef = useRef<HTMLInputElement>(null);
+  const scanInputLockRef = useRef(false);
   const discountInputRef = useRef<HTMLInputElement>(null);
   const taxInputRef = useRef<HTMLInputElement>(null);
   const cashReceivedRef = useRef<HTMLInputElement>(null);
@@ -201,7 +206,37 @@ export function usePosBilling() {
   };
 
   // Hardware Scanner Hook capture
+  const restorePosFieldValue = useCallback((element: Element, value: string) => {
+    if (element === scanInputRef.current) {
+      if (scanInputLockRef.current) return;
+      setScanQuery(value);
+      return;
+    }
+    if (element === discountInputRef.current) {
+      setTempDiscount(value);
+      return;
+    }
+    if (element === taxInputRef.current) {
+      setTempTaxRate(value);
+      return;
+    }
+    if (element === cashReceivedRef.current) {
+      setCashReceived(value);
+      return;
+    }
+    if (element === cardDigitsRef.current) {
+      setCardDigits(value);
+      return;
+    }
+    if (element === bankNameRef.current) {
+      setBankName(value);
+      return;
+    }
+    defaultRestoreFieldValue(element, value);
+  }, []);
+
   const handleHardwareScan = async (barcode: string) => {
+    applyScannedDestinationValue(scanInputRef, barcode, setScanQuery);
     let matched = products.find((p) => p.barcode === barcode || p.quickCode === barcode);
 
     if (!matched) {
@@ -234,7 +269,11 @@ export function usePosBilling() {
     }
   };
 
-  useHardwareScanner(handleHardwareScan);
+  useRegisterScanHandler(handleHardwareScan, true, {
+    scanDestinationRefs: [scanInputRef],
+    restoreFieldValue: restorePosFieldValue,
+    scanInputLockRef,
+  });
 
   // Categories list based on active business type
   const categories = useMemo(() => {
@@ -770,6 +809,7 @@ export function usePosBilling() {
     handleCreateCustomer,
     handlePaymentMethodChange,
     scanInputRef,
+    scanInputLockRef,
     discountInputRef,
     taxInputRef,
     cashReceivedRef,

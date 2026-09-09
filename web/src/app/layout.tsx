@@ -18,6 +18,7 @@ import { WifiOff } from 'lucide-react';
 import { MobileBlocker } from '../components/layout/MobileBlocker';
 import { useActiveDeviceTracker } from '../hooks/useActiveDeviceTracker';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ScannerProvider } from '../contexts/ScannerContext';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const language = useSettingsStore((s) => s.language) || 'en';
@@ -54,7 +55,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Regular Application Layout */}
         <div className="app-layout-wrapper">
           <QueryClientProvider client={queryClient}>
-            <RootLayoutContent>{children}</RootLayoutContent>
+            <ScannerProvider>
+              <RootLayoutContent>{children}</RootLayoutContent>
+            </ScannerProvider>
           </QueryClientProvider>
         </div>
       </body>

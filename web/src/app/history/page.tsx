@@ -1,6 +1,11 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
+import {
+  useRegisterScanHandler,
+  defaultRestoreFieldValue,
+  applyScannedDestinationValue,
+} from '../../contexts/ScannerContext';
 import { useAuthStore } from '../../stores/authStore';
 import { useBusinessStore } from '../../stores/businessStore';
 import { Search, CheckCircle, FileSpreadsheet, FileText } from 'lucide-react';
@@ -49,6 +54,26 @@ export default function OrderHistoryPage() {
 
   // States
   const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputLockRef = useRef(false);
+
+  const restoreHistoryFieldValue = useCallback((element: Element, value: string) => {
+    defaultRestoreFieldValue(element, value);
+  }, []);
+
+  useRegisterScanHandler(
+    (code) => {
+      applyScannedDestinationValue(searchInputRef, code, setSearchQuery);
+      searchInputRef.current?.focus();
+    },
+    true,
+    {
+      scanDestinationRefs: [searchInputRef],
+      restoreFieldValue: restoreHistoryFieldValue,
+      scanInputLockRef: searchInputLockRef,
+    }
+  );
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -320,9 +345,13 @@ Thank you for shopping with us!
           <Search size={18} color="var(--muted)" />
           <input
             type="text"
+            ref={searchInputRef}
             placeholder="Search by invoice number, payment method, or status..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              if (searchInputLockRef.current) return;
+              setSearchQuery(e.target.value);
+            }}
             style={styles.searchInput}
           />
         </div>

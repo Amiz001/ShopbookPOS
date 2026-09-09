@@ -147,42 +147,6 @@ export const Scanner: React.FC<ScannerProps> = ({ onScan, onClose }) => {
   );
 };
 
-// Global hook for USB/Keyboard emulated barcode scanner captures
-export const useHardwareScanner = (onScan: (barcode: string) => void) => {
-  useEffect(() => {
-    let buffer = '';
-    let lastKeyTime = Date.now();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore modifier key presses alone
-      if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') return;
-
-      const currentTime = Date.now();
-      const diff = currentTime - lastKeyTime;
-      lastKeyTime = currentTime;
-
-      // USB/Bluetooth hardware scanners type extremely fast (typically < 35ms per key stroke)
-      if (diff < 50) {
-        if (e.key === 'Enter') {
-          if (buffer.length > 3) {
-            e.preventDefault();
-            onScan(buffer);
-          }
-          buffer = '';
-        } else {
-          buffer += e.key;
-        }
-      } else {
-        // Slow key press: reset buffer and check if it's the start of a scanner input
-        buffer = e.key === 'Enter' ? '' : e.key;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onScan]);
-};
-
 const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed',
