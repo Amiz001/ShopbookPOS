@@ -333,7 +333,11 @@ export default {
     syncing: 'දත්ත සමමුහුර්ත වෙමින් පවතී... 🔄',
     syncSuccess: 'දත්ත සාර්ථකව සමමුහුර්ත කරන ලදී! ✅',
     syncFailed: 'සමමුහුර්ත කිරීම අසාර්ථකයි',
-    syncFailedMsg: 'අන්තර්ජාල සම්බන්ධතාවය සහ Supabase වින්‍යාසය පරීක්ෂා කරන්න.',
+    syncFailedMsg: 'අන්තර්ජාල සම්බන්ධතාවය පරීක්ෂා කර නැවත උත්සාහ කරන්න.',
+    syncSkipped: 'සමමුහුර්තකරණය මඟහැරිණි',
+    syncSkippedBackupOff: 'Cloud backup අක්‍රීයයි. Settings වලින් සක්‍රීය කර නැවත උත්සාහ කරන්න.',
+    syncSkippedNoBusiness: 'ක්‍රියාකාරී ව්‍යාපාරයක් තෝරා නැත. ව්‍යාපාරයක් තෝරා නැවත උත්සාහ කරන්න.',
+    syncSkippedEnvMissing: 'මෙම build එකේ Supabase වින්‍යාසය නොමැත. සහාය අමතන්න.',
 
     // Support
     helpTitle: 'උදව් සහ පාරිභෝගික සහය',

@@ -12,6 +12,7 @@ import { setOnSyncSuccess } from '../services/sync';
 import { useSyncRefreshStore } from '../stores/useSyncRefreshStore';
 import { setupNotificationListeners } from '../services/notificationService';
 import { useForceUpdate } from '../hooks/useForceUpdate';
+import { useEntitlementRealtime } from '../hooks/useEntitlement';
 import { ForceUpdateScreen } from '../components/screens/ForceUpdateScreen';
 import { CustomSplashScreen } from '../components/screens/CustomSplashScreen';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -56,6 +57,9 @@ function MainAppContent() {
   const isPro = useEntitlementStore((s) => s.isPro);
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const needsPackages = isLoggedIn && !isPro;
+
+  // Pro unlock from another device, live on the paywall and in the tabs alike.
+  useEntitlementRealtime();
 
   useEffect(() => {
     if (isProPackagesReady()) {

@@ -55,7 +55,11 @@ export const useAuthStore = create<AuthState>()(
           activeBusinessId: null,
           activeEmployeeId: null,
         });
-        void supabase.auth.signOut().catch(() => undefined);
+        // Local scope only. The default ('global') revokes every session of
+        // this phone number, so signing out on one till killed the refresh
+        // token on every other device ("Invalid Refresh Token: Refresh Token
+        // Not Found") and bounced them to login.
+        void supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
         useCart.getState().clearCart();
       },
     }),

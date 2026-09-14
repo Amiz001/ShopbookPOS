@@ -10,6 +10,7 @@
 import { useEffect } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import { useAuthStore } from '../stores/useAuthStore';
+import { supabase } from '../services/supabaseClient';
 import { useEntitlementStore } from '../stores/useEntitlementStore';
 import {
   addCustomerInfoListener,
@@ -33,6 +34,47 @@ export function useIsBusinessOwner(): boolean {
   // In offline mode or initial registration, an 'admin' role in auth store is the business owner.
   // Cashiers and managers ('cashier' | 'manager') will never match 'admin'.
   return isOwner || userRole === 'admin';
+}
+
+/**
+ * Cross-device Pro unlock. Mounted once at the root so it is live on the
+ * paywall as well as inside the tabs.
+ *
+ * The RevenueCat webhook writes `subscriptions`, a trigger broadcasts
+ * `entitlement_changed` on `entitlement:{business_id}`, and every device of
+ * that business re-reads get_entitlement. Foreground is covered too, for the
+ * case where the socket was asleep when the broadcast went out.
+ */
+export function useEntitlementRealtime() {
+  const activeBusinessId = useAuthStore((s) => s.activeBusinessId);
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const refresh = useEntitlementStore((s) => s.refresh);
+
+  useEffect(() => {
+    if (!isLoggedIn || !activeBusinessId || activeBusinessId === '0') return;
+
+    const channel = supabase
+      .channel(`entitlement:${activeBusinessId}`, { config: { private: true } })
+      .on('broadcast', { event: 'entitlement_changed' }, () => {
+        console.log('[Entitlement] change broadcast received. Refreshing...');
+        void refresh(activeBusinessId);
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log(`[Entitlement] Subscribed to entitlement:${activeBusinessId}`);
+        }
+      });
+
+    const onAppStateChange = (state: AppStateStatus) => {
+      if (state === 'active') void refresh(activeBusinessId);
+    };
+    const sub = AppState.addEventListener('change', onAppStateChange);
+
+    return () => {
+      sub.remove();
+      supabase.removeChannel(channel);
+    };
+  }, [isLoggedIn, activeBusinessId, refresh]);
 }
 
 export function useEntitlementSync() {
