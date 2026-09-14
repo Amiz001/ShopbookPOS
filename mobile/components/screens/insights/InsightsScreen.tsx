@@ -33,6 +33,7 @@ import { ReportsBottomSheet } from './components/ReportsBottomSheet';
 import { hapticFeedback } from '../../../utils/haptics';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useIsPro } from '../../../hooks/useEntitlement';
+import { money } from '../../../utils/money';
 
 export const InsightsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -259,7 +260,7 @@ export const InsightsScreen: React.FC = () => {
     try {
       const content =
         exportType === 'CSV'
-          ? `Shopbook POS - Tabular CSV Statement for ${activeBiz.name}\nGross Revenue: Rs. ${stats?.grossRevenue.toLocaleString()}\nTotal Orders: ${stats?.ordersCount}`
+          ? `Shopbook POS - Tabular CSV Statement for ${activeBiz.name}\nGross Revenue: Rs. ${money(stats?.grossRevenue)}\nTotal Orders: ${stats?.ordersCount}`
           : `Shopbook POS - Premium PDF Invoice statement for ${activeBiz.name}\nGenerated on Sri Lanka Helplines.`;
       await Share.share({
         message: content,
@@ -436,7 +437,7 @@ export const InsightsScreen: React.FC = () => {
                   <Feather name="trending-up" size={16} color="#10B981" />
                 </View>
                 <Text style={styles.kpiLabel}>{t('insights.kpiGrossSales')}</Text>
-                <Text style={styles.kpiValue}>Rs. {stats?.grossRevenue.toLocaleString()}</Text>
+                <Text style={styles.kpiValue}>Rs. {money(stats?.grossRevenue)}</Text>
               </View>
 
               <View style={styles.kpiCard}>
@@ -555,9 +556,7 @@ export const InsightsScreen: React.FC = () => {
                       <Text style={styles.statItemQty}>
                         {item.quantity} {t('insights.units')}
                       </Text>
-                      <Text style={styles.statItemRevenue}>
-                        Rs. {item.revenue.toLocaleString()}
-                      </Text>
+                      <Text style={styles.statItemRevenue}>Rs. {money(item.revenue)}</Text>
                     </View>
                   ))}
                 </View>
@@ -578,9 +577,7 @@ export const InsightsScreen: React.FC = () => {
                       <Text style={styles.statItemQty}>
                         {item.quantity} {t('insights.units')}
                       </Text>
-                      <Text style={styles.statItemRevenue}>
-                        Rs. {item.revenue.toLocaleString()}
-                      </Text>
+                      <Text style={styles.statItemRevenue}>Rs. {money(item.revenue)}</Text>
                     </View>
                   ))}
                 </View>

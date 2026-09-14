@@ -20,14 +20,25 @@ import { useEntitlementStore } from '../stores/useEntitlementStore';
 import { supabase } from '../services/supabaseClient';
 import * as SplashScreen from 'expo-splash-screen';
 import { configurePurchases, isProPackagesReady, onProPackagesReady } from '../services/purchases';
+import { AppErrorBoundary, ErrorFallback } from '../components/common/AppErrorBoundary';
+import { installCrashGuard } from '../services/crashGuard';
+import type { ErrorBoundaryProps } from 'expo-router';
 
 // Prevent native splash screen from hiding automatically on app startup
 SplashScreen.preventAutoHideAsync().catch((err) => {
   console.warn('Failed to prevent native splash auto hide:', err);
 });
 
+// Never let an uncaught JS error terminate the process in release builds.
+installCrashGuard();
+
 // Configure RevenueCat immediately at startup so offerings are prefetched during splash
 configurePurchases();
+
+/** Route-level boundary: an error inside any screen shows a retry page, not a crash. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return <ErrorFallback error={error} retry={retry} />;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -170,7 +181,9 @@ export default function RootLayout() {
           <StatusBar style="dark" />
           <PermissionProvider>
             <BottomSheetModalProvider>
-              <MainAppContent />
+              <AppErrorBoundary>
+                <MainAppContent />
+              </AppErrorBoundary>
             </BottomSheetModalProvider>
           </PermissionProvider>
         </SafeAreaProvider>

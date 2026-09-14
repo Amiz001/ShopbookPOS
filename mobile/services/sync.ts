@@ -1,3 +1,4 @@
+import { Q } from '@nozbe/watermelondb';
 import { synchronize } from '@nozbe/watermelondb/sync';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -84,6 +85,133 @@ async function pushChangesInOrder(changes: SyncChanges, clientBusinessId: string
       client_business_id: clientBusinessId,
     });
     if (error) throw new Error(`push ${table}: ${error.message}`);
+  }
+}
+
+type PushRow = Record<string, unknown> & { id: string };
+
+function rowsOf(slice: TableChanges | undefined): PushRow[] {
+  return [...(slice?.created ?? []), ...(slice?.updated ?? [])] as PushRow[];
+}
+
+/** business_id of local parent rows, keyed by parent id. Deleted parents are absent. */
+async function parentBusinessIds(
+  table: 'orders' | 'products',
+  ids: string[]
+): Promise<Map<string, string>> {
+  const unique = Array.from(new Set(ids.filter(Boolean)));
+  if (unique.length === 0) return new Map();
+  const rows = await database
+    .get(table)
+    .query(Q.where('id', Q.oneOf(unique)))
+    .fetch();
+  return new Map(
+    rows.map((r) => [
+      r.id,
+      String((r._raw as unknown as Record<string, unknown>).business_id ?? ''),
+    ])
+  );
+}
+
+/**
+ * WatermelonDB pushes every dirty row in the local database, across all
+ * businesses on this device. The server RPC is scoped to one business per
+ * call and rejects a `businesses` row whose id is not that business, so a
+ * single dirty row from another branch (or from a shop registered on this
+ * phone under another account) made every sync fail with
+ * "unauthorized business push". Split the push per business instead.
+ *
+ * Deletions carry only ids, so they are sent with every group; the server
+ * deletes only rows that belong to the business it was called for.
+ */
+async function splitChangesByBusiness(
+  changes: SyncChanges,
+  activeBusinessId: string
+): Promise<Map<string, SyncChanges>> {
+  const [orderBiz, productBiz] = await Promise.all([
+    parentBusinessIds(
+      'orders',
+      rowsOf(changes.order_items).map((r) => String(r.order_id ?? ''))
+    ),
+    parentBusinessIds(
+      'products',
+      rowsOf(changes.inventory_logs).map((r) => String(r.product_id ?? ''))
+    ),
+  ]);
+
+  const businessOf = (table: SyncTableName, row: PushRow): string => {
+    let bid: string | undefined;
+    if (table === 'businesses') bid = row.id;
+    else if (table === 'order_items') bid = orderBiz.get(String(row.order_id ?? ''));
+    else if (table === 'inventory_logs') bid = productBiz.get(String(row.product_id ?? ''));
+    else bid = row.business_id ? String(row.business_id) : undefined;
+    return bid || activeBusinessId;
+  };
+
+  const groups = new Map<string, SyncChanges>();
+  const bucket = (bid: string, table: SyncTableName, kind: 'created' | 'updated', row: PushRow) => {
+    const group = groups.get(bid) ?? {};
+    const slice = group[table] ?? { created: [], updated: [], deleted: [] };
+    (slice[kind] ??= []).push(row);
+    group[table] = slice;
+    groups.set(bid, group);
+  };
+
+  let hasDeletes = false;
+  for (const table of PUSH_TABLE_ORDER) {
+    const slice = changes[table];
+    if (!slice) continue;
+    for (const row of (slice.created ?? []) as PushRow[])
+      bucket(businessOf(table, row), table, 'created', row);
+    for (const row of (slice.updated ?? []) as PushRow[])
+      bucket(businessOf(table, row), table, 'updated', row);
+    if (slice.deleted?.length) hasDeletes = true;
+  }
+
+  if (hasDeletes && !groups.has(activeBusinessId)) groups.set(activeBusinessId, {});
+  // A deleted branch is identified by its own id, so it needs its own group
+  // even when nothing else of it is dirty.
+  for (const id of (changes.businesses?.deleted ?? []) as string[]) {
+    if (!groups.has(id)) groups.set(id, {});
+  }
+  for (const group of groups.values()) {
+    for (const table of PUSH_TABLE_ORDER) {
+      const deleted = changes[table]?.deleted ?? [];
+      if (deleted.length === 0) continue;
+      const slice = group[table] ?? { created: [], updated: [] };
+      group[table] = { ...slice, deleted };
+    }
+  }
+
+  return groups;
+}
+
+function isPermissionError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /not a member|unauthorized|permission denied|42501/i.test(msg);
+}
+
+async function pushAllBusinesses(changes: SyncChanges, activeBusinessId: string): Promise<void> {
+  const groups = await splitChangesByBusiness(changes, activeBusinessId);
+  // Active business first so its failure surfaces before anything else.
+  const ordered = [
+    ...(groups.has(activeBusinessId) ? [activeBusinessId] : []),
+    ...Array.from(groups.keys()).filter((bid) => bid !== activeBusinessId),
+  ];
+
+  for (const bid of ordered) {
+    try {
+      await pushChangesInOrder(groups.get(bid)!, bid);
+    } catch (err) {
+      // Rows for a business this account cannot access (left over from a
+      // previous login on this phone) can never be pushed. Skipping them
+      // lets Watermelon mark them synced instead of blocking every sync.
+      if (bid !== activeBusinessId && isPermissionError(err)) {
+        console.warn(`[Sync] Skipping unsyncable rows for business ${bid}:`, err);
+        continue;
+      }
+      throw err;
+    }
   }
 }
 
@@ -199,7 +327,7 @@ async function syncDatabaseDetailed(): Promise<SyncOutcome> {
         };
       },
       pushChanges: async ({ changes }) => {
-        await pushChangesInOrder(changes as SyncChanges, activeBusinessId);
+        await pushAllBusinesses(changes as SyncChanges, activeBusinessId);
 
         // Broadcast sync trigger to other active terminals
         const hasChanges = Object.values(changes).some((slice) =>

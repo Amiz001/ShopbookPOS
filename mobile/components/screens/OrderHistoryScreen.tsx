@@ -35,6 +35,7 @@ import { useActiveBusiness } from '../../hooks/useActiveBusiness';
 import { useSyncRefreshStore } from '../../stores/useSyncRefreshStore';
 import { PremiumUpgradeModal } from '../common/PremiumUpgradeModal';
 import { useIsPro } from '../../hooks/useEntitlement';
+import { money, moneyFixed } from '../../utils/money';
 
 const CARD_GAP = 12;
 const INNER_TEXT_GAP = 4;
@@ -176,7 +177,7 @@ export const OrderHistoryScreen: React.FC<{ isTab?: boolean }> = ({ isTab = fals
               minute: '2-digit',
             })}
           </Text>
-          <Text style={styles.orderTotal}>Rs. {order.totalAmount.toLocaleString()}</Text>
+          <Text style={styles.orderTotal}>Rs. {money(order.totalAmount)}</Text>
         </View>
       </TouchableOpacity>
     ),
@@ -188,31 +189,28 @@ export const OrderHistoryScreen: React.FC<{ isTab?: boolean }> = ({ isTab = fals
     try {
       const itemsListText = orderItems
         .map(
-          (item) =>
-            `• ${item.quantity} × ${item.name} - Rs. ${(
-              item.price * item.quantity
-            ).toLocaleString()}`
+          (item) => `• ${item.quantity} × ${item.name} - Rs. ${money(item.price * item.quantity)}`
         )
         .join('\n');
 
       const message = `
 =================================
-       ${activeBiz.name.toUpperCase()}
+       ${(activeBiz.name ?? '').toUpperCase()}
        ${activeBiz.category}
        ${activeBiz.address || 'Sri Lanka'}
 =================================
 Invoice: ${selectedOrder.invoiceNumber}
 Date: ${new Date(selectedOrder.createdAt).toLocaleString()}
-Status: ${selectedOrder.status.toUpperCase()}
+Status: ${(selectedOrder.status ?? 'paid').toUpperCase()}
 ---------------------------------
 Items:
 ${itemsListText}
 ---------------------------------
-Subtotal: Rs. ${subtotal.toLocaleString()}
-${taxLabel}: Rs. ${tax.toLocaleString()}
-${discountLabel}: Rs. ${discount.toLocaleString()}
+Subtotal: Rs. ${money(subtotal)}
+${taxLabel}: Rs. ${money(tax)}
+${discountLabel}: Rs. ${money(discount)}
 ---------------------------------
-Total Amount: Rs. ${selectedOrder.totalAmount.toLocaleString()}
+Total Amount: Rs. ${money(selectedOrder.totalAmount)}
 =================================
 Thank you for shopping with us!
 `;
@@ -455,7 +453,7 @@ Thank you for shopping with us!
                         {item.quantity}x {item.name}
                       </Text>
                       <Text style={styles.thermalRowRight}>
-                        Rs. {(item.price * item.quantity).toFixed(2)}
+                        Rs. {moneyFixed(item.price * item.quantity)}
                       </Text>
                     </View>
                   ))
@@ -465,23 +463,23 @@ Thank you for shopping with us!
 
                 <View style={styles.thermalRow}>
                   <Text style={styles.thermalSummaryBold}>Subtotal</Text>
-                  <Text style={styles.thermalSummaryBold}>Rs. {subtotal.toFixed(2)}</Text>
+                  <Text style={styles.thermalSummaryBold}>Rs. {moneyFixed(subtotal)}</Text>
                 </View>
                 <View style={styles.thermalRow}>
                   <Text style={styles.thermalRowLeft}>{taxLabel}</Text>
-                  <Text style={styles.thermalRowRight}>Rs. {tax.toFixed(2)}</Text>
+                  <Text style={styles.thermalRowRight}>Rs. {moneyFixed(tax)}</Text>
                 </View>
                 {discount > 0 ? (
                   <View style={styles.thermalRow}>
                     <Text style={styles.thermalRowLeft}>{discountLabel}</Text>
-                    <Text style={styles.thermalRowRight}>- Rs. {discount.toFixed(2)}</Text>
+                    <Text style={styles.thermalRowRight}>- Rs. {moneyFixed(discount)}</Text>
                   </View>
                 ) : null}
 
                 <View style={[styles.thermalRow, { marginTop: 6 }]}>
                   <Text style={styles.thermalTotalLabel}>TOTAL</Text>
                   <Text style={styles.thermalTotalValue}>
-                    Rs. {selectedOrder.totalAmount.toFixed(2)}
+                    Rs. {moneyFixed(selectedOrder.totalAmount)}
                   </Text>
                 </View>
 

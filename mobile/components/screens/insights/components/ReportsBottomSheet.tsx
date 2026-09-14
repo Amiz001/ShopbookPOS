@@ -20,6 +20,7 @@ import { TOKENS } from '../../../../constants/tokens';
 import { styles } from '../styles';
 import { OrderItemsList, OrderCardHeaderRight } from './OrderHistoryHelpers';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { money } from '../../../../utils/money';
 
 interface ReportsBottomSheetProps {
   visible: boolean;
@@ -212,7 +213,7 @@ export const ReportsBottomSheet: React.FC<ReportsBottomSheetProps> = ({
                       </View>
                       <View style={{ alignItems: 'flex-end', gap: 4 }}>
                         <Text style={styles.historyTotalAmount}>
-                          Rs. {order.totalAmount.toLocaleString()}
+                          Rs. {money(order.totalAmount)}
                         </Text>
                         <OrderCardHeaderRight orderId={order.id} isExpanded={isExpanded} />
                       </View>
