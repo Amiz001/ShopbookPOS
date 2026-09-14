@@ -11,7 +11,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "lk.shopbook.pos",
       "version": "1.0.10",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSBluetoothAlwaysUsageDescription": "Shopbook POS requires Bluetooth to connect with thermal printers.",
@@ -21,7 +21,7 @@
     "android": {
       "package": "lk.shopbook.pos",
       "version": "1.0.10",
-      "versionCode": 10,
+      "versionCode": 11,
       "permissions": [
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
