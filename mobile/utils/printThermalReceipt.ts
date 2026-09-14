@@ -3,9 +3,11 @@ import * as Print from 'expo-print';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { buildThermalReceiptHtml, BuildThermalReceiptOptions } from './thermalReceiptHtml';
 
-// Dynamically load RNBluetoothClassic only on Native platforms to avoid Web bundle errors
+// Dynamically load RNBluetoothClassic ONLY on Android.
+// On iOS, Bluetooth Classic (SPP) is not supported for generic thermal printers,
+// and initializing it without MFi protocols crashes the Swift runtime on release builds.
 let RNBluetoothClassic: any = null;
-if (Platform.OS !== 'web') {
+if (Platform.OS === 'android') {
   try {
     RNBluetoothClassic = require('react-native-bluetooth-classic').default;
   } catch (e) {
