@@ -10,6 +10,13 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { syncDatabase, supabase, getClientId } from '../../services/sync';
 import { useEntitlementSync } from '../../hooks/useEntitlement';
 import { useEntitlementStore } from '../../stores/useEntitlementStore';
+import { ErrorFallback } from '../../components/common/AppErrorBoundary';
+import type { ErrorBoundaryProps } from 'expo-router';
+
+/** A tab screen that throws shows a retry page while the rest of the app keeps running. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return <ErrorFallback error={error} retry={retry} />;
+}
 
 export default function TabLayout() {
   useActiveDeviceTracker();

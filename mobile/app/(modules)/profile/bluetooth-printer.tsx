@@ -19,11 +19,29 @@ import { TOKENS } from '../../../constants/tokens';
 import { useSettingsStore } from '../../../stores/useSettingsStore';
 import { getTopSafeInset } from '../../../utils/safeArea';
 import { useBusinessStore } from '../../../stores/useBusinessStore';
-import RNBluetoothClassic, { BluetoothDevice } from 'react-native-bluetooth-classic';
 import Barcode from 'react-native-barcode-svg';
 import { hapticFeedback } from '@/utils/haptics';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useIsPro } from '../../../hooks/useEntitlement';
+
+export type BluetoothDevice = {
+  name?: string;
+  address: string;
+  [key: string]: any;
+};
+
+// Only load RNBluetoothClassic on Android to prevent iOS Swift fatal crashes on release builds
+const getRNBluetoothClassic = () => {
+  if (Platform.OS === 'android') {
+    try {
+      return require('react-native-bluetooth-classic').default;
+    } catch (e) {
+      console.warn('react-native-bluetooth-classic could not be imported.', e);
+      return null;
+    }
+  }
+  return null;
+};
 
 export default function BluetoothPrinterRoute() {
   const insets = useSafeAreaInsets();
@@ -60,6 +78,15 @@ export default function BluetoothPrinterRoute() {
     hapticFeedback.impactLight();
 
     try {
+      if (Platform.OS === 'ios') {
+        setIsScanning(false);
+        Alert.alert(
+          'Bluetooth Thermal Printer',
+          'Direct Bluetooth Classic (SPP) scanning is supported on Android devices. On iOS, you can print receipts seamlessly using AirPrint / System Print from the checkout screen.'
+        );
+        return;
+      }
+
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -79,7 +106,14 @@ export default function BluetoothPrinterRoute() {
         }
       }
 
-      const isEnabled = await RNBluetoothClassic.isBluetoothEnabled();
+      const btc = getRNBluetoothClassic();
+      if (!btc) {
+        setIsScanning(false);
+        triggerToast('Bluetooth printing is not available on this device.');
+        return;
+      }
+
+      const isEnabled = await btc.isBluetoothEnabled();
       if (!isEnabled) {
         hapticFeedback.notificationWarning();
         Alert.alert(
@@ -90,7 +124,7 @@ export default function BluetoothPrinterRoute() {
         return;
       }
 
-      const bonded = await RNBluetoothClassic.getBondedDevices();
+      const bonded = await btc.getBondedDevices();
       setDevices(bonded);
 
       if (bonded.length === 0) {
@@ -113,8 +147,15 @@ export default function BluetoothPrinterRoute() {
     setConnectingDevice(device.address);
     hapticFeedback.impactMedium();
 
+    const btc = getRNBluetoothClassic();
+    if (!btc) {
+      triggerToast('Bluetooth printer module is unavailable.');
+      setConnectingDevice(null);
+      return;
+    }
+
     try {
-      const isConnected = await RNBluetoothClassic.connectToDevice(device.address);
+      const isConnected = await btc.connectToDevice(device.address);
 
       if (isConnected) {
         hapticFeedback.notificationSuccess();
@@ -167,8 +208,18 @@ export default function BluetoothPrinterRoute() {
       return;
     }
 
+    const btc = getRNBluetoothClassic();
+    if (!btc) {
+      hapticFeedback.notificationWarning();
+      Alert.alert(
+        'Printer Unavailable',
+        'Bluetooth printer module is not available on this device.'
+      );
+      return;
+    }
+
     try {
-      const device = await RNBluetoothClassic.connectToDevice(pairedPrinter.address);
+      const device = await btc.connectToDevice(pairedPrinter.address);
 
       // Build ESC/POS payload
       let receiptText = '';

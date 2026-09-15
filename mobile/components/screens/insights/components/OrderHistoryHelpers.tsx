@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { TOKENS } from '../../../../constants/tokens';
 import { useGetOrderItems } from '../../../../hooks/useOrders';
 import { styles } from '../styles';
+import { money } from '../../../../utils/money';
 
 export const OrderItemsList: React.FC<{ orderId: string }> = ({ orderId }) => {
   const { data: items = [], isLoading } = useGetOrderItems(orderId);
@@ -18,11 +19,9 @@ export const OrderItemsList: React.FC<{ orderId: string }> = ({ orderId }) => {
         <View key={item.id} style={styles.expandedItemRow}>
           <Text style={styles.expandedItemName}>{item.name}</Text>
           <Text style={styles.expandedItemQty}>
-            {item.quantity} x Rs. {item.price.toLocaleString()}
+            {item.quantity} x Rs. {money(item.price)}
           </Text>
-          <Text style={styles.expandedItemSubtotal}>
-            Rs. {(item.quantity * item.price).toLocaleString()}
-          </Text>
+          <Text style={styles.expandedItemSubtotal}>Rs. {money(item.quantity * item.price)}</Text>
         </View>
       ))}
     </>

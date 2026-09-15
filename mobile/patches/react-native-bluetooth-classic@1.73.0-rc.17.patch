@@ -1,13 +1,70 @@
-diff --git a/ios/RNBluetoothClassic.m b/ios/RNBluetoothClassic.m
-index e2793dd79ff6b36ec2103e9360ef274fdc0faa55..6a44d24b73ff4581c374beef5019f0ef719fb534 100644
---- a/ios/RNBluetoothClassic.m
-+++ b/ios/RNBluetoothClassic.m
-@@ -131,7 +131,7 @@ @interface RCT_EXTERN_MODULE(RNBluetoothClassic, NSObject)
-  * @param resolver
-  * @param rejecter
-  */
--RCT_EXTERN_METHOD(available: (NSString *)deviceId
-+RCT_EXTERN_METHOD(availableFromDevice: (NSString *)deviceId
-                   resolver: (RCTPromiseResolveBlock)resolve
-                   rejecter: (RCTPromiseRejectBlock)reject)
+diff --git a/ios/BluetoothError.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/BluetoothError.swift
+deleted file mode 100644
+index ca90934a31030762dfd7fc85b3b4de789c2e65bc..0000000000000000000000000000000000000000
+diff --git a/ios/BluetoothMessage.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/BluetoothMessage.swift
+deleted file mode 100644
+index bdc14b5b97e37acdbf2b89f2766c470cae433fab..0000000000000000000000000000000000000000
+diff --git a/ios/BluetoothRequest.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/BluetoothRequest.swift
+deleted file mode 100644
+index 97e90dd7cb582fe303ee4c327017b498166b8981..0000000000000000000000000000000000000000
+diff --git a/ios/BluetoothState.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/BluetoothState.swift
+deleted file mode 100644
+index 302da99df227584e80254ae7ba4a5de1ed34145e..0000000000000000000000000000000000000000
+diff --git a/ios/Mappable.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/Mappable.swift
+deleted file mode 100644
+index c40b5f7be4091b3d7bf89dc557308e42b501a456..0000000000000000000000000000000000000000
+diff --git a/ios/RNBluetoothClassic-Bridging-Header.h b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/RNBluetoothClassic-Bridging-Header.h
+deleted file mode 100644
+index 75a496d528380089b11cc56521918db1047caa3b..0000000000000000000000000000000000000000
+diff --git a/ios/RNBluetoothClassic.m b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/RNBluetoothClassic.m
+deleted file mode 100644
+index e2793dd79ff6b36ec2103e9360ef274fdc0faa55..0000000000000000000000000000000000000000
+diff --git a/ios/RNBluetoothClassic.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/RNBluetoothClassic.swift
+deleted file mode 100644
+index 398104710f24be9ea461ea060e0326a290bf5f02..0000000000000000000000000000000000000000
+diff --git a/ios/RNBluetoothClassic.xcodeproj/project.pbxproj b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/RNBluetoothClassic.xcodeproj/project.pbxproj
+deleted file mode 100644
+index a7872e339214b919ecb28cb1fd17ae1ff47f9d9a..0000000000000000000000000000000000000000
+diff --git a/ios/RNBluetoothClassic.xcodeproj/xcshareddata/xcschemes/RNBluetoothClassic.xcscheme b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/RNBluetoothClassic.xcodeproj/xcshareddata/xcschemes/RNBluetoothClassic.xcscheme
+deleted file mode 100644
+index da63d29ddb5c53217533c6623467b1eca0a2baaa..0000000000000000000000000000000000000000
+diff --git a/ios/RNBluetoothClassic.xcworkspace/contents.xcworkspacedata b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/RNBluetoothClassic.xcworkspace/contents.xcworkspacedata
+deleted file mode 100644
+index e924f04a5958f66675c28243af74264d436f4760..0000000000000000000000000000000000000000
+diff --git a/ios/conn/DelimitedStringDeviceConnectionImpl.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/conn/DelimitedStringDeviceConnectionImpl.swift
+deleted file mode 100644
+index aadf057fc42878680b3ffbef83777ae20a8fcc5f..0000000000000000000000000000000000000000
+diff --git a/ios/conn/DeviceConnection.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/conn/DeviceConnection.swift
+deleted file mode 100644
+index e925fee403d1ed649cc4450c41f08df817bb1469..0000000000000000000000000000000000000000
+diff --git a/ios/conn/DeviceConnectionFactory.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/conn/DeviceConnectionFactory.swift
+deleted file mode 100644
+index 6616e10ae8f511e8a8483f184086f62c561cadfc..0000000000000000000000000000000000000000
+diff --git a/ios/device/NativeDevice.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/device/NativeDevice.swift
+deleted file mode 100644
+index 30edc43174f32f58d7c80b543d4a279135e74fb2..0000000000000000000000000000000000000000
+diff --git a/ios/event/BluetoothDeviceEvent.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/event/BluetoothDeviceEvent.swift
+deleted file mode 100644
+index 4e33c6c81ebaba1239be325af440849f40cf6f62..0000000000000000000000000000000000000000
+diff --git a/ios/event/EventType.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/event/EventType.swift
+deleted file mode 100644
+index 480c569f6c6bc7573c39edc21f2628476f3f857c..0000000000000000000000000000000000000000
+diff --git a/ios/extensions/StringEncodingExtension.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/extensions/StringEncodingExtension.swift
+deleted file mode 100644
+index f878e10cf2dade2c8ad508d5e73d6693ac08a348..0000000000000000000000000000000000000000
+diff --git a/ios/extensions/SubstringExtension.swift b/Users/mithushancj/.bun/install/cache/react-native-bluetooth-classic@1.73.0-92453a835b5e6c37@@@1/ios/extensions/SubstringExtension.swift
+deleted file mode 100644
+index a4dcac37a2c3cd17b7531bc02c01c0a7e8e77d28..0000000000000000000000000000000000000000
+diff --git a/react-native-bluetooth-classic.podspec b/react-native-bluetooth-classic.podspec
+index 3a5e53cd6c1a113491be282ea26c27f096c48da6..080037248e1d0fbaecde6f016f53d3674299fe5a 100644
+--- a/react-native-bluetooth-classic.podspec
++++ b/react-native-bluetooth-classic.podspec
+@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
+   s.platform     = :ios, "9.0"
  
+   s.source       = { :git => "https://github.com/kenjdavidson/react-native-bluetooth-classic.git", :tag => "v#{s.version}" }
+-  s.source_files = "ios/**/*.{h,m,swift}"
++  s.source_files = []
+   s.requires_arc = true
+   s.homepage = "https://github.com/kenjdavidson/react-native-bluetooth-classic"
+   s.swift_version    = '4.1'

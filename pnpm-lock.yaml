@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   react-native-bluetooth-classic@1.73.0-rc.17:
-    hash: c44003f2c0dd38140ac99f470e68c9921c30c54ed7d539b1e65df80d98ed0121
+    hash: d778dc9ff9b8fae656a56dbb2961d5115cd5954a07a39a67b95d2acbde10ab67
     path: mobile/patches/react-native-bluetooth-classic@1.73.0-rc.17.patch
 
 importers:
@@ -180,7 +180,7 @@ importers:
         version: 0.0.15(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-bluetooth-classic:
         specifier: 1.73.0-rc.17
-        version: 1.73.0-rc.17(patch_hash=c44003f2c0dd38140ac99f470e68c9921c30c54ed7d539b1e65df80d98ed0121)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))
+        version: 1.73.0-rc.17(patch_hash=d778dc9ff9b8fae656a56dbb2961d5115cd5954a07a39a67b95d2acbde10ab67)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))
       react-native-calendars:
         specifier: ^1.1314.0
         version: 1.1314.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -13574,7 +13574,7 @@ snapshots:
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
       react-native-svg: 15.12.1(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
 
-  react-native-bluetooth-classic@1.73.0-rc.17(patch_hash=c44003f2c0dd38140ac99f470e68c9921c30c54ed7d539b1e65df80d98ed0121)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)):
+  react-native-bluetooth-classic@1.73.0-rc.17(patch_hash=d778dc9ff9b8fae656a56dbb2961d5115cd5954a07a39a67b95d2acbde10ab67)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)):
     dependencies:
       buffer: 6.0.3
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)

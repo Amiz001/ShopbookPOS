@@ -336,7 +336,11 @@ export default {
     syncing: 'Syncing database... 🔄',
     syncSuccess: 'Database synced successfully! ✅',
     syncFailed: 'Sync Failed',
-    syncFailedMsg: 'Check your internet connection and Supabase environment configuration.',
+    syncFailedMsg: 'Check your internet connection and try again.',
+    syncSkipped: 'Sync Skipped',
+    syncSkippedBackupOff: 'Cloud backup is turned off. Enable it in Settings to sync.',
+    syncSkippedNoBusiness: 'No active business selected. Select a business and try again.',
+    syncSkippedEnvMissing: 'This build is missing its Supabase configuration. Contact support.',
 
     // Support
     helpTitle: 'Help & Customer Support',

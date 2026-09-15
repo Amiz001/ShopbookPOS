@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { TOKENS } from '../../constants/tokens';
 import { ProductImage } from './ProductImage';
 import { CartItem, cartState } from '../data/cartState';
+import { money } from '../../utils/money';
 
 interface InvoiceItemCardProps {
   item: CartItem;
@@ -18,12 +19,12 @@ export const InvoiceItemCard: React.FC<InvoiceItemCardProps> = ({ item }) => {
           {item.name}
         </Text>
         <Text style={styles.itemQuantities}>
-          {item.quantity} × Rs. {item.price.toLocaleString()}
+          {item.quantity} × Rs. {money(item.price)}
         </Text>
       </View>
 
       <View style={styles.itemRightRow}>
-        <Text style={styles.itemTotal}>Rs. {(item.price * item.quantity).toLocaleString()}</Text>
+        <Text style={styles.itemTotal}>Rs. {money(item.price * item.quantity)}</Text>
 
         <View style={styles.cardActions}>
           <TouchableOpacity

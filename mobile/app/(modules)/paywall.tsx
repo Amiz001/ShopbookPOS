@@ -137,6 +137,7 @@ export default function PaywallRoute() {
 
   const setFromSdk = useEntitlementStore((s) => s.setFromSdk);
   const refreshEntitlement = useEntitlementStore((s) => s.refresh);
+  const isPro = useEntitlementStore((s) => s.isPro);
 
   const cachedPkgs = getCachedProPackages();
   const cachedConfig = getCachedAppConfig();
@@ -150,6 +151,13 @@ export default function PaywallRoute() {
     privacy: cachedConfig?.privacy_url ?? 'https://pos.shopbook.lk/privacy',
   });
   const [selectedId, setSelectedId] = useState<string>('$rc_annual');
+
+  // Pro can arrive while this screen is open: a purchase on another device
+  // (via the entitlement broadcast) or a late webhook after a purchase here.
+  // Leave as soon as the server says so instead of waiting for a restart.
+  useEffect(() => {
+    if (isPro) router.replace('/(tabs)');
+  }, [isPro, router]);
 
   useEffect(() => {
     return onProPackagesReady(() => {

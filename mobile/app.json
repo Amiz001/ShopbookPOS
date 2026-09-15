@@ -2,7 +2,7 @@
   "expo": {
     "name": "Shopbook POS",
     "slug": "shopbook-pos",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "shopbookpos",
@@ -10,8 +10,8 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "lk.shopbook.pos",
-      "version": "1.0.9",
-      "buildNumber": "9",
+      "version": "1.0.10",
+      "buildNumber": "11",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSBluetoothAlwaysUsageDescription": "Shopbook POS requires Bluetooth to connect with thermal printers.",
@@ -20,8 +20,8 @@
     },
     "android": {
       "package": "lk.shopbook.pos",
-      "version": "1.0.9",
-      "versionCode": 9,
+      "version": "1.0.10",
+      "versionCode": 11,
       "permissions": [
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
@@ -84,7 +84,7 @@
         "projectId": "c3dfd340-0c26-4a74-9dd9-062842904f76"
       }
     },
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": "1.0.10",
     "owner": "shopbook_fayaz",
     "updates": {
       "url": "https://u.expo.dev/c3dfd340-0c26-4a74-9dd9-062842904f76"

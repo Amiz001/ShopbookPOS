@@ -8,7 +8,7 @@ import { TOKENS } from '../../constants/tokens';
 import { cartState } from '../data/cartState';
 import { useActiveBusiness } from '../../hooks/useActiveBusiness';
 import { useSettingsStore } from '../../stores/useSettingsStore';
-import { syncDatabase } from '../../services/sync';
+import { syncDatabaseNow } from '../../services/sync';
 import { useUserPermissions } from '../../hooks/useUserPermissions';
 import { BusinessAvatar } from '../common/BusinessAvatar';
 import { deleteCurrentDeviceSession } from '../../hooks/useActiveDeviceTracker';
@@ -359,13 +359,29 @@ export const ProfileScreen: React.FC = () => {
                 hapticFeedback.impactMedium();
                 checkPremiumAction('Manual database synchronization', async () => {
                   triggerToast(t('profile.syncing'));
-                  const success = await syncDatabase();
-                  if (success) {
+                  const outcome = await syncDatabaseNow();
+                  if (outcome.status === 'success') {
                     hapticFeedback.notificationSuccess();
                     triggerToast(t('profile.syncSuccess'));
-                  } else {
+                  } else if (outcome.status === 'skipped') {
+                    hapticFeedback.notificationWarning();
+                    const reasonKey =
+                      outcome.reason === 'backup_disabled'
+                        ? 'profile.syncSkippedBackupOff'
+                        : outcome.reason === 'no_business'
+                          ? 'profile.syncSkippedNoBusiness'
+                          : 'profile.syncSkippedEnvMissing';
+                    Alert.alert(t('profile.syncSkipped'), t(reasonKey));
+                  } else if (outcome.status === 'error') {
                     hapticFeedback.notificationError();
-                    Alert.alert(t('profile.syncFailed'), t('profile.syncFailedMsg'));
+                    Alert.alert(
+                      t('profile.syncFailed'),
+                      outcome.message || t('profile.syncFailedMsg')
+                    );
+                  } else {
+                    // 'deferred' cannot happen from syncDatabaseNow, but keep the UI honest.
+                    hapticFeedback.notificationWarning();
+                    triggerToast(t('profile.syncing'));
                   }
                 });
               }}
