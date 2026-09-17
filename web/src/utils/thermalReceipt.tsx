@@ -1,16 +1,15 @@
-import React from 'react';
 import {
+  Cashdraw,
+  Cut,
+  dotsPerMm,
+  Feed,
+  Line,
   Printer,
-  Text,
+  PRINTER_PROFILES,
+  render,
   Row,
   Table,
-  Line,
-  Feed,
-  Cut,
-  Cashdraw,
-  render,
-  dotsPerMm,
-  PRINTER_PROFILES,
+  Text,
   type TextRasterizer,
 } from '@angadie/chittie';
 import { buildReceiptModel, formatMoney, type ReceiptModelInput } from './receiptModel';
@@ -41,8 +40,8 @@ const LINE_SPACING_DOTS = 24;
 
 /** Vertical spacing in millimetres, converted to dots per the profile's DPI. */
 const SPACING_MM = {
-  beforeFooter: 3,
-  beforeCut: 5,
+  beforeFooter: 1,
+  beforeCut: 2,
 } as const;
 
 const feedDots = (mm: number, dpi: number) => Math.round(mm * dotsPerMm(dpi));
@@ -71,7 +70,7 @@ const FONT_FAMILIES = ['Noto Sans Sinhala', 'Noto Sans Tamil', 'sans-serif'];
  * printer's DPI, so a glyph is the same physical size on 203 and 300 DPI.
  */
 export const browserRasterizer: TextRasterizer = {
-  rasterize(text, { fontSize = 24, maxWidth = 576, bold = false, fontFamilies } = {}) {
+  rasterize(text, { fontSize = 20, maxWidth = 576, bold = false, fontFamilies } = {}) {
     if (typeof document === 'undefined') {
       throw new Error('thermalReceipt: non-Latin text needs a browser canvas (no document here)');
     }
@@ -83,7 +82,7 @@ export const browserRasterizer: TextRasterizer = {
     const ascent = Math.ceil(m.actualBoundingBoxAscent || fontSize * 0.8);
     const descent = Math.ceil(m.actualBoundingBoxDescent || fontSize * 0.22);
     const w = Math.min(Math.ceil(m.width) + 4, maxWidth);
-    const h = ascent + descent + 2;
+    const h = Math.min(ascent + descent + 2, fontSize);
     const c = document.createElement('canvas');
     c.width = w;
     c.height = h;
@@ -120,8 +119,6 @@ export function buildReceiptElement(params: RenderReceiptParams) {
         </Text>
       ) : null}
 
-      <Line />
-
       <Row gap={GAP} left="Invoice" right={m.invoiceNumber} />
       {/* One row, not two: a date and a time are one fact about the sale. */}
       <Row gap={GAP} left="Date" right={m.time ? `${m.date} ${m.time}` : m.date} />
@@ -156,8 +153,6 @@ export function buildReceiptElement(params: RenderReceiptParams) {
       {/* Double height is what separates the total from the numbers above it —
           it needs no rule of its own, and a rule would only cost a line. */}
       <Row gap={GAP} height={2} left="TOTAL" right={formatMoney(m.total)} />
-
-      <Line />
 
       <Row gap={GAP} left="Payment" right={m.paymentMethod.toUpperCase()} />
       {m.cashTendered !== null ? (
