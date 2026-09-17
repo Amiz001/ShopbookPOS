@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, renderHook, act } from '@testing-library/react';
-import { Scanner, useHardwareScanner } from '../../components/Scanner';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import { Scanner } from '../../components/Scanner';
 
-describe('Scanner & useHardwareScanner Component', () => {
+describe('Scanner Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -159,100 +159,5 @@ describe('Scanner & useHardwareScanner Component', () => {
 
     // Instead of silently doing nothing, the user is told and pointed elsewhere.
     expect(await findByText(/Use Chrome or Edge/i)).toBeInTheDocument();
-  });
-
-  // ─── useHardwareScanner ──────────────────────────────────────────
-
-  test('should trigger hardware scanner callback on rapid key strokes', () => {
-    const mockOnScan = vi.fn();
-
-    // IMPORTANT: spy on Date.now BEFORE renderHook so that the hook's initial
-    // `lastKeyTime = Date.now()` also uses the faked value
-    let fakeTime = 1000000;
-    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => fakeTime);
-
-    renderHook(() => useHardwareScanner(mockOnScan));
-
-    for (const char of '47900101') {
-      fakeTime += 10; // 10ms between keys → scanner speed
-      fireEvent.keyDown(window, { key: char });
-    }
-    fakeTime += 10;
-    fireEvent.keyDown(window, { key: 'Enter' });
-
-    expect(mockOnScan).toHaveBeenCalledWith('47900101');
-    nowSpy.mockRestore();
-  });
-
-  test('should ignore key events if typings are too slow (manual entry)', () => {
-    const mockOnScan = vi.fn();
-    renderHook(() => useHardwareScanner(mockOnScan));
-
-    let fakeTime = 2000000;
-    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
-      fakeTime += 100; // 100ms between keys → manual typing
-      return fakeTime;
-    });
-
-    for (const char of '47900101') {
-      fireEvent.keyDown(window, { key: char });
-    }
-    fireEvent.keyDown(window, { key: 'Enter' });
-
-    expect(mockOnScan).not.toHaveBeenCalled();
-    nowSpy.mockRestore();
-  });
-
-  test('should ignore modifier keys (Shift, Control, Alt, Meta)', () => {
-    const mockOnScan = vi.fn();
-    renderHook(() => useHardwareScanner(mockOnScan));
-
-    let fakeTime = 3000000;
-    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
-      fakeTime += 5;
-      return fakeTime;
-    });
-
-    fireEvent.keyDown(window, { key: 'Shift' });
-    fireEvent.keyDown(window, { key: 'Control' });
-    fireEvent.keyDown(window, { key: 'Alt' });
-    fireEvent.keyDown(window, { key: 'Meta' });
-    fireEvent.keyDown(window, { key: 'Enter' });
-
-    expect(mockOnScan).not.toHaveBeenCalled();
-    nowSpy.mockRestore();
-  });
-
-  test('should not call onScan for short scanner buffer (< 4 chars)', () => {
-    const mockOnScan = vi.fn();
-    renderHook(() => useHardwareScanner(mockOnScan));
-
-    let fakeTime = 4000000;
-    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
-      fakeTime += 5;
-      return fakeTime;
-    });
-
-    fireEvent.keyDown(window, { key: 'A' });
-    fireEvent.keyDown(window, { key: 'B' });
-    fireEvent.keyDown(window, { key: 'Enter' });
-
-    expect(mockOnScan).not.toHaveBeenCalled();
-    nowSpy.mockRestore();
-  });
-
-  test('should handle Enter key as first slow key (resets buffer to empty)', () => {
-    const mockOnScan = vi.fn();
-    renderHook(() => useHardwareScanner(mockOnScan));
-
-    let fakeTime = 5000000;
-    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
-      fakeTime += 200;
-      return fakeTime;
-    });
-
-    fireEvent.keyDown(window, { key: 'Enter' });
-    expect(mockOnScan).not.toHaveBeenCalled();
-    nowSpy.mockRestore();
   });
 });

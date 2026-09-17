@@ -30,6 +30,8 @@ interface StocksTableProps {
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
+  searchInputLockRef?: React.RefObject<boolean>;
 }
 
 export const StocksTable: React.FC<StocksTableProps> = ({
@@ -42,6 +44,8 @@ export const StocksTable: React.FC<StocksTableProps> = ({
   hasNextPage,
   isFetchingNextPage,
   fetchNextPage,
+  searchInputRef,
+  searchInputLockRef,
 }) => {
   const router = useRouter();
   const tableWrapperRef = useRef<HTMLDivElement>(null);
@@ -89,9 +93,13 @@ export const StocksTable: React.FC<StocksTableProps> = ({
           <Search size={16} color="var(--muted)" />
           <input
             type="text"
+            ref={searchInputRef}
             placeholder="Search products by name, category, barcode..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              if (searchInputLockRef?.current) return;
+              setSearchQuery(e.target.value);
+            }}
             style={styles.searchInput}
           />
         </div>

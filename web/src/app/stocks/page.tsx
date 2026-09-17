@@ -1,10 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { useBusinessStore } from '../../stores/businessStore';
 import { Package, History, CheckCircle, Lock } from 'lucide-react';
 import { useUserPermissions } from '../../hooks/useUserPermissions';
+import {
+  useRegisterScanHandler,
+  defaultRestoreFieldValue,
+  applyScannedDestinationValue,
+} from '../../contexts/ScannerContext';
 import './stocks.css';
 
 import { StocksTable } from '../../components/stocks/StocksTable';
@@ -36,11 +41,53 @@ export default function StocksPage() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const activeBusiness = useBusinessStore((s) => s.activeBusiness);
   const { canPerform } = useUserPermissions();
+  const canUpdateProducts = canPerform('update', 'products');
 
-  // States
   const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputLockRef = useRef(false);
 
-  if (!canPerform('update', 'products')) {
+  const restoreStocksFieldValue = useCallback((element: Element, value: string) => {
+    defaultRestoreFieldValue(element, value);
+  }, []);
+
+  useRegisterScanHandler(
+    (code) => {
+      applyScannedDestinationValue(searchInputRef, code, setSearchQuery);
+      searchInputRef.current?.focus();
+    },
+    canUpdateProducts,
+    {
+      scanDestinationRefs: [searchInputRef],
+      restoreFieldValue: restoreStocksFieldValue,
+      scanInputLockRef: searchInputLockRef,
+    }
+  );
+
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'inventory' | 'audit'>('inventory');
+
+  // Stock Adjustment Modal
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<DBProduct | null>(null);
+
+  // Add New Item Modal
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // React Query Hooks
+  const {
+    data: products = [],
+    isLoading: loadingProducts,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useProducts(undefined, searchQuery);
+
+  const { data: logs = [] } = useGetGlobalStockHistory(activeBusiness?.id || '0');
+  const adjustStockMutation = useAdjustStock();
+  const addProductMutation = useAddProduct();
+
+  if (!canUpdateProducts) {
     return (
       <div
         style={{
@@ -93,28 +140,6 @@ export default function StocksPage() {
       </div>
     );
   }
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'audit'>('inventory');
-
-  // Stock Adjustment Modal
-  const [showAdjustModal, setShowAdjustModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<DBProduct | null>(null);
-
-  // Add New Item Modal
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  // React Query Hooks
-  const {
-    data: products = [],
-    isLoading: loadingProducts,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useProducts(undefined, searchQuery);
-
-  const { data: logs = [] } = useGetGlobalStockHistory(activeBusiness?.id || '0');
-  const adjustStockMutation = useAdjustStock();
-  const addProductMutation = useAddProduct();
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -193,6 +218,8 @@ export default function StocksPage() {
             filteredProducts={products}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            searchInputRef={searchInputRef}
+            searchInputLockRef={searchInputLockRef}
             onAdjustStock={(p) => {
               setSelectedProduct(p);
               setShowAdjustModal(true);

@@ -81,6 +81,7 @@ export default function PosBillingPage() {
     handleCreateCustomer,
     handlePaymentMethodChange,
     scanInputRef,
+    scanInputLockRef,
     discountInputRef,
     taxInputRef,
     cashReceivedRef,
@@ -128,6 +129,7 @@ export default function PosBillingPage() {
               setScanQuery={setScanQuery}
               handleScanSubmit={handleScanSubmit}
               scanInputRef={scanInputRef}
+              scanInputLockRef={scanInputLockRef}
             />
           )}
         </div>
